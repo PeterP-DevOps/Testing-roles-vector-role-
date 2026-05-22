@@ -1,0 +1,34 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Create molecule containers
+      community.docker.docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        command: sleep infinity
+        privileged: "{{ item.privileged | default(false) }}"
+        state: started
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Populate instance config dict
+      set_fact:
+        instance_conf_dict: >-
+          {{
+            instance_conf_dict | default([]) +
+            [{
+              'instance': item.name,
+              'address': item.name,
+              'user': 'root',
+              'port': 22
+            }]
+          }}
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Dump instance config
+      copy:
+        content: "{{ instance_conf_dict | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"

@@ -1,0 +1,12 @@
+---
+vector_version: "0.39.0"
+
+vector_user: vector
+vector_group: vector
+
+vector_install_dir: /opt/vector
+vector_config_dir: /etc/vector
+vector_config_file: "vector.toml"
+
+vector_binary_path: /usr/local/bin/vector
+vector_data_dir: "/var/lib/vector"

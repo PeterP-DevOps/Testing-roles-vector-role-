@@ -1,0 +1,36 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Check vector binary exists
+      ansible.builtin.command: /usr/local/bin/vector --version
+      register: vector_version
+      changed_when: false
+
+    - name: Assert vector installed
+      ansible.builtin.assert:
+        that:
+          - vector_version.rc == 0
+
+    - name: Check vector config exists
+      ansible.builtin.stat:
+        path: /etc/vector/vector.toml
+      register: vector_config
+
+    - name: Assert config exists
+      ansible.builtin.assert:
+        that:
+          - vector_config.stat.exists
+
+    - name: Validate vector config
+      ansible.builtin.command:
+        cmd: /usr/local/bin/vector validate /etc/vector/vector.toml
+      register: vector_validate
+      changed_when: false
+
+    - name: Assert config valid
+      ansible.builtin.assert:
+        that:
+          - vector_validate.rc == 0

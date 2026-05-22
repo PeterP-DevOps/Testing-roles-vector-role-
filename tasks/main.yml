@@ -1,0 +1,46 @@
+---
+- name: Download Vector archive
+  ansible.builtin.get_url:
+    url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-x86_64-unknown-linux-gnu.tar.gz"
+    dest: /tmp/vector.tar.gz
+    mode: '0644'
+
+- name: Extract Vector archive
+  ansible.builtin.unarchive:
+    src: /tmp/vector.tar.gz
+    dest: /tmp/
+    remote_src: true
+
+- name: Copy Vector binary
+  ansible.builtin.copy:
+    src: "/tmp/vector-x86_64-unknown-linux-gnu/bin/vector"
+    dest: /usr/local/bin/vector
+    remote_src: true
+    mode: '0755'
+
+- name: Create vector user
+  ansible.builtin.user:
+    name: vector
+    shell: /usr/sbin/nologin
+    system: true
+
+- name: Create vector config dir
+  ansible.builtin.file:
+    path: "{{ vector_config_dir }}"
+    state: directory
+    owner: vector
+    group: vector
+    mode: '0755'
+
+- name: Deploy vector config
+  template:
+    src: vector.toml.j2
+    dest: "{{ vector_config_dir }}/{{ vector_config_file }}"
+  
+- name: Create vector data dir
+  file:
+    path: "{{ vector_data_dir }}"
+    state: directory
+    owner: vector
+    group: vector
+    mode: '0755'
