@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+
+  tasks:
+    - name: Check vector binary
+      stat:
+        path: /usr/local/bin/vector
+      register: vector_bin
+
+    - name: Assert vector installed
+      assert:
+        that:
+          - vector_bin.stat.exists
